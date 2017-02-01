@@ -4091,9 +4091,6 @@ namespace Nop.Services.Installation
                 CustomerGuid = Guid.NewGuid(),
                 Email = defaultUserEmail,
                 Username = defaultUserEmail,
-                Password = defaultUserPassword,
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Active = true,
                 CreatedOnUtc = DateTime.UtcNow,
                 LastActivityDateUtc = DateTime.UtcNow,
@@ -4119,9 +4116,19 @@ namespace Nop.Services.Installation
             adminUser.Addresses.Add(defaultAdminUserAddress);
             adminUser.BillingAddress = defaultAdminUserAddress;
             adminUser.ShippingAddress = defaultAdminUserAddress;
+
+            adminUser.CustomerPasswords.Add(new CustomerPassword
+            {
+                Password = defaultUserPassword,
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
             adminUser.CustomerRoles.Add(crAdministrators);
             adminUser.CustomerRoles.Add(crForumModerators);
             adminUser.CustomerRoles.Add(crRegistered);
+
             _customerRepository.Insert(adminUser);
             //set default customer name
             _genericAttributeService.SaveAttribute(adminUser, SystemCustomerAttributeNames.FirstName, "John");
@@ -4135,9 +4142,6 @@ namespace Nop.Services.Installation
                 CustomerGuid = Guid.NewGuid(),
                 Email = secondUserEmail,
                 Username = secondUserEmail,
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Active = true,
                 CreatedOnUtc = DateTime.UtcNow,
                 LastActivityDateUtc = DateTime.UtcNow,
@@ -4162,7 +4166,17 @@ namespace Nop.Services.Installation
             secondUser.Addresses.Add(defaultSecondUserAddress);
             secondUser.BillingAddress = defaultSecondUserAddress;
             secondUser.ShippingAddress = defaultSecondUserAddress;
+
+            secondUser.CustomerPasswords.Add(new CustomerPassword
+            {
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
             secondUser.CustomerRoles.Add(crRegistered);
+
             _customerRepository.Insert(secondUser);
             //set default customer name
             _genericAttributeService.SaveAttribute(secondUser, SystemCustomerAttributeNames.FirstName, defaultSecondUserAddress.FirstName);
@@ -4176,9 +4190,6 @@ namespace Nop.Services.Installation
                 CustomerGuid = Guid.NewGuid(),
                 Email = thirdUserEmail,
                 Username = thirdUserEmail,
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Active = true,
                 CreatedOnUtc = DateTime.UtcNow,
                 LastActivityDateUtc = DateTime.UtcNow,
@@ -4202,6 +4213,16 @@ namespace Nop.Services.Installation
             thirdUser.Addresses.Add(defaultThirdUserAddress);
             thirdUser.BillingAddress = defaultThirdUserAddress;
             thirdUser.ShippingAddress = defaultThirdUserAddress;
+
+            thirdUser.CustomerPasswords.Add(new CustomerPassword
+            {
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
+
             thirdUser.CustomerRoles.Add(crRegistered);
             _customerRepository.Insert(thirdUser);
             //set default customer name
@@ -4216,9 +4237,6 @@ namespace Nop.Services.Installation
                 CustomerGuid = Guid.NewGuid(),
                 Email = fourthUserEmail,
                 Username = fourthUserEmail,
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Active = true,
                 CreatedOnUtc = DateTime.UtcNow,
                 LastActivityDateUtc = DateTime.UtcNow,
@@ -4242,7 +4260,17 @@ namespace Nop.Services.Installation
             fourthUser.Addresses.Add(defaultFourthUserAddress);
             fourthUser.BillingAddress = defaultFourthUserAddress;
             fourthUser.ShippingAddress = defaultFourthUserAddress;
+
+            fourthUser.CustomerPasswords.Add(new CustomerPassword
+            {
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
             fourthUser.CustomerRoles.Add(crRegistered);
+
             _customerRepository.Insert(fourthUser);
             //set default customer name
             _genericAttributeService.SaveAttribute(fourthUser, SystemCustomerAttributeNames.FirstName, defaultFourthUserAddress.FirstName);
@@ -4256,9 +4284,6 @@ namespace Nop.Services.Installation
                 CustomerGuid = Guid.NewGuid(),
                 Email = fifthUserEmail,
                 Username = fifthUserEmail,
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Active = true,
                 CreatedOnUtc = DateTime.UtcNow,
                 LastActivityDateUtc = DateTime.UtcNow,
@@ -4283,7 +4308,17 @@ namespace Nop.Services.Installation
             fifthUser.Addresses.Add(defaultFifthUserAddress);
             fifthUser.BillingAddress = defaultFifthUserAddress;
             fifthUser.ShippingAddress = defaultFifthUserAddress;
+
+            fifthUser.CustomerPasswords.Add(new CustomerPassword
+            {
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
             fifthUser.CustomerRoles.Add(crRegistered);
+
             _customerRepository.Insert(fifthUser);
             //set default customer name
             _genericAttributeService.SaveAttribute(fifthUser, SystemCustomerAttributeNames.FirstName, defaultFifthUserAddress.FirstName);
@@ -4297,9 +4332,6 @@ namespace Nop.Services.Installation
                 CustomerGuid = Guid.NewGuid(),
                 Email = sixthUserEmail,
                 Username = sixthUserEmail,
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Active = true,
                 CreatedOnUtc = DateTime.UtcNow,
                 LastActivityDateUtc = DateTime.UtcNow,
@@ -4324,7 +4356,17 @@ namespace Nop.Services.Installation
             sixthUser.Addresses.Add(defaultSixthUserAddress);
             sixthUser.BillingAddress = defaultSixthUserAddress;
             sixthUser.ShippingAddress = defaultSixthUserAddress;
+
+            sixthUser.CustomerPasswords.Add(new CustomerPassword
+            {
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
             sixthUser.CustomerRoles.Add(crRegistered);
+
             _customerRepository.Insert(sixthUser);
             //set default customer name
             _genericAttributeService.SaveAttribute(sixthUser, SystemCustomerAttributeNames.FirstName, defaultSixthUserAddress.FirstName);
@@ -4336,7 +4378,6 @@ namespace Nop.Services.Installation
             {
                 Email = "builtin@search_engine_record.com",
                 CustomerGuid = Guid.NewGuid(),
-                PasswordFormat = PasswordFormat.Clear,
                 AdminComment = "Built-in system guest record used for requests from search engines.",
                 Active = true,
                 IsSystemAccount = true,
@@ -4354,7 +4395,6 @@ namespace Nop.Services.Installation
             {
                 Email = "builtin@background-task-record.com",
                 CustomerGuid = Guid.NewGuid(),
-                PasswordFormat = PasswordFormat.Clear,
                 AdminComment = "Built-in system record used for background tasks.",
                 Active = true,
                 IsSystemAccount = true,

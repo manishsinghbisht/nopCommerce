@@ -3812,3 +3812,65 @@ BEGIN
     VALUES (N'RecurringPaymentFailed.CustomerNotification', NULL, N'%Store.Name%. Last recurring payment failed', N'<p>' + @NewLine + '<a href=\"%Store.URL%\">%Store.Name%</a>' + @NewLine + '<br />' + @NewLine + '<br />' + @NewLine + 'Hello %Customer.FullName%,' + @NewLine + '<br />' + @NewLine + 'It appears your credit card didn''t go through for this recurring payment (<a href=\"%Order.OrderURLForCustomer%\" target=\"_blank\">%Order.OrderURLForCustomer%</a>)' + @NewLine + '<br /> %if (%RecurringPayment.RecurringPaymentType% == "Manual") ' + @NewLine + 'You can recharge balance and manually retry payment or cancel it on the order history page. endif% %if (%RecurringPayment.RecurringPaymentType% == "Automatic") ' + @NewLine + 'You can recharge balance and wait, we will try to make the payment again, or you can cancel it on the order history page. endif%' + @NewLine + '</p>' + @NewLine, 1, 0, 0, 0, 0)
 END
 GO
+
+ --new table
+IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CustomerPassword]') and OBJECTPROPERTY(object_id, N'IsUserTable') = 1)
+BEGIN
+	CREATE TABLE [dbo].[CustomerPassword]
+    (
+		[Id] int IDENTITY(1,1) NOT NULL,
+        [CustomerId] int NOT NULL,
+		[Password] NVARCHAR (MAX) NULL,
+        [PasswordFormatId] INT NOT NULL,
+        [PasswordSalt] NVARCHAR (MAX) NULL,
+		[CreatedOnUtc] datetime NOT NULL
+		PRIMARY KEY CLUSTERED 
+		(
+			[Id] ASC
+		) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON)
+	)
+END
+GO
+
+IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'CustomerPassword_Customer' AND parent_object_id = Object_id('CustomerPassword') AND Objectproperty(object_id, N'IsForeignKey') = 1)
+BEGIN
+    ALTER TABLE [dbo].CustomerPassword
+    DROP CONSTRAINT CustomerPassword_Customer
+END
+GO
+
+ALTER TABLE [dbo].[CustomerPassword] WITH CHECK ADD CONSTRAINT [CustomerPassword_Customer] FOREIGN KEY([CustomerId])
+REFERENCES [dbo].[Customer] ([Id])
+ON DELETE CASCADE
+GO
+
+--move customer passwords into a new table
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[Customer]') and (NAME='Password' or NAME='PasswordFormatId' or NAME='PasswordSalt'))
+BEGIN
+    EXEC('
+        INSERT INTO [dbo].[CustomerPassword]([CustomerId], [Password], [PasswordFormatId], [PasswordSalt], [CreatedOnUtc])
+        SELECT [Id], [Password], [PasswordFormatId], [PasswordSalt], [CreatedOnUtc]
+        FROM [dbo].[Customer]')
+END
+GO
+
+--drop column
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[Customer]') and NAME='Password')
+BEGIN
+	ALTER TABLE [Customer] DROP COLUMN [Password]
+END
+GO
+
+--drop column
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[Customer]') and NAME='PasswordFormatId')
+BEGIN
+	ALTER TABLE [Customer] DROP COLUMN [PasswordFormatId]
+END
+GO
+
+--drop column
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id=object_id('[Customer]') and NAME='PasswordSalt')
+BEGIN
+	ALTER TABLE [Customer] DROP COLUMN [PasswordSalt]
+END
+GO

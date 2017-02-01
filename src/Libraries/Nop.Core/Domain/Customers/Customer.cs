@@ -10,6 +10,7 @@ namespace Nop.Core.Domain.Customers
     /// </summary>
     public partial class Customer : BaseEntity
     {
+        private ICollection<CustomerPassword> _customerPasswords;
         private ICollection<ExternalAuthenticationRecord> _externalAuthenticationRecords;
         private ICollection<CustomerRole> _customerRoles;
         private ICollection<ShoppingCartItem> _shoppingCartItems;
@@ -22,7 +23,6 @@ namespace Nop.Core.Domain.Customers
         public Customer()
         {
             this.CustomerGuid = Guid.NewGuid();
-            this.PasswordFormat = PasswordFormat.Clear;
         }
 
         /// <summary>
@@ -42,27 +42,6 @@ namespace Nop.Core.Domain.Customers
         /// Gets or sets the email that should be re-validated. Used in scenarios when a customer is already registered and wants to change an email address.
         /// </summary>
         public string EmailToRevalidate { get; set; }
-        /// <summary>
-        /// Gets or sets the password
-        /// </summary>
-        public string Password { get; set; }
-
-        /// <summary>
-        /// Gets or sets the password format
-        /// </summary>
-        public int PasswordFormatId { get; set; }
-        /// <summary>
-        /// Gets or sets the password format
-        /// </summary>
-        public PasswordFormat PasswordFormat
-        {
-            get { return (PasswordFormat)PasswordFormatId; }
-            set { this.PasswordFormatId = (int)value; }
-        }
-        /// <summary>
-        /// Gets or sets the password salt
-        /// </summary>
-        public string PasswordSalt { get; set; }
 
         /// <summary>
         /// Gets or sets the admin comment
@@ -152,8 +131,17 @@ namespace Nop.Core.Domain.Customers
         ///  Gets or sets the store identifier in which customer registered
         /// </summary>
         public int RegisteredInStoreId { get; set; }
-        
+
         #region Navigation properties
+
+        /// <summary>
+        /// Gets or sets customer passwords
+        /// </summary>
+        public virtual ICollection<CustomerPassword> CustomerPasswords
+        {
+            get { return _customerPasswords ?? (_customerPasswords = new List<CustomerPassword>()); }
+            protected set { _customerPasswords = value; }
+        }
 
         /// <summary>
         /// Gets or sets customer generated content

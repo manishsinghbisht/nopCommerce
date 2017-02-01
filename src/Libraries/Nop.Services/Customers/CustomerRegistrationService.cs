@@ -102,21 +102,27 @@ namespace Nop.Services.Customers
             if (customer.CannotLoginUntilDateUtc.HasValue && customer.CannotLoginUntilDateUtc.Value > DateTime.UtcNow)
                 return CustomerLoginResults.LockedOut;
 
-            string pwd;
-            switch (customer.PasswordFormat)
+            var isValid = false;
+            var customerPassword = customer.GetCustomerPassword();
+            if (customerPassword != null)
             {
-                case PasswordFormat.Encrypted:
-                    pwd = _encryptionService.EncryptText(password);
-                    break;
-                case PasswordFormat.Hashed:
-                    pwd = _encryptionService.CreatePasswordHash(password, customer.PasswordSalt, _customerSettings.HashedPasswordFormat);
-                    break;
-                default:
-                    pwd = password;
-                    break;
+                var pwd = string.Empty;
+                switch (customerPassword.PasswordFormat)
+                {
+                    case PasswordFormat.Encrypted:
+                        pwd = _encryptionService.EncryptText(password);
+                        break;
+                    case PasswordFormat.Hashed:
+                        pwd = _encryptionService.CreatePasswordHash(password, customerPassword.PasswordSalt, _customerSettings.HashedPasswordFormat);
+                        break;
+                    default:
+                        pwd = password;
+                        break;
+                }
+
+                isValid = pwd.Equals(customerPassword.Password);
             }
 
-            bool isValid = pwd == customer.Password;
             if (!isValid)
             {
                 //wrong password
@@ -215,30 +221,29 @@ namespace Nop.Services.Customers
             //at this point request is valid
             request.Customer.Username = request.Username;
             request.Customer.Email = request.Email;
-            request.Customer.PasswordFormat = request.PasswordFormat;
 
+            var customerPassword = new CustomerPassword
+            {
+                PasswordFormat = request.PasswordFormat,
+                CreatedOnUtc = DateTime.UtcNow
+            };
             switch (request.PasswordFormat)
             {
                 case PasswordFormat.Clear:
-                    {
-                        request.Customer.Password = request.Password;
-                    }
+                        customerPassword.Password = request.Password;
                     break;
                 case PasswordFormat.Encrypted:
-                    {
-                        request.Customer.Password = _encryptionService.EncryptText(request.Password);
-                    }
+                    customerPassword.Password = _encryptionService.EncryptText(request.Password);
                     break;
                 case PasswordFormat.Hashed:
                     {
-                        string saltKey = _encryptionService.CreateSaltKey(5);
-                        request.Customer.PasswordSalt = saltKey;
-                        request.Customer.Password = _encryptionService.CreatePasswordHash(request.Password, saltKey, _customerSettings.HashedPasswordFormat);
+                        var saltKey = _encryptionService.CreateSaltKey(5);
+                        customerPassword.PasswordSalt = saltKey;
+                        customerPassword.Password = _encryptionService.CreatePasswordHash(request.Password, saltKey, _customerSettings.HashedPasswordFormat);
                     }
                     break;
-                default:
-                    break;
             }
+            request.Customer.CustomerPasswords.Add(customerPassword);
 
             request.Customer.Active = request.IsApproved;
             
@@ -295,64 +300,61 @@ namespace Nop.Services.Customers
                 return result;
             }
 
-
-            var requestIsValid = false;
             if (request.ValidateRequest)
             {
-                //password
-                string oldPwd;
-                switch (customer.PasswordFormat)
+                var isValid = false;
+                var currentPassword = customer.GetCustomerPassword();
+                if (currentPassword != null)
                 {
-                    case PasswordFormat.Encrypted:
-                        oldPwd = _encryptionService.EncryptText(request.OldPassword);
-                        break;
-                    case PasswordFormat.Hashed:
-                        oldPwd = _encryptionService.CreatePasswordHash(request.OldPassword, customer.PasswordSalt, _customerSettings.HashedPasswordFormat);
-                        break;
-                    default:
-                        oldPwd = request.OldPassword;
-                        break;
+                    var oldPwd = string.Empty;
+                    switch (currentPassword.PasswordFormat)
+                    {
+                        case PasswordFormat.Encrypted:
+                            oldPwd = _encryptionService.EncryptText(request.OldPassword);
+                            break;
+                        case PasswordFormat.Hashed:
+                            oldPwd = _encryptionService.CreatePasswordHash(request.OldPassword, currentPassword.PasswordSalt, _customerSettings.HashedPasswordFormat);
+                            break;
+                        default:
+                            oldPwd = request.OldPassword;
+                            break;
+                    }
+                    isValid = oldPwd.Equals(currentPassword.Password);
                 }
 
-                bool oldPasswordIsValid = oldPwd == customer.Password;
-                if (!oldPasswordIsValid)
+                //request isn't valid
+                if (!isValid)
+                {
                     result.AddError(_localizationService.GetResource("Account.ChangePassword.Errors.OldPasswordDoesntMatch"));
-
-                if (oldPasswordIsValid)
-                    requestIsValid = true;
+                    return result;
+                }
             }
-            else
-                requestIsValid = true;
-
 
             //at this point request is valid
-            if (requestIsValid)
+            var customerPassword = new CustomerPassword
             {
-                switch (request.NewPasswordFormat)
-                {
-                    case PasswordFormat.Clear:
-                        {
-                            customer.Password = request.NewPassword;
-                        }
-                        break;
-                    case PasswordFormat.Encrypted:
-                        {
-                            customer.Password = _encryptionService.EncryptText(request.NewPassword);
-                        }
-                        break;
-                    case PasswordFormat.Hashed:
-                        {
-                            string saltKey = _encryptionService.CreateSaltKey(5);
-                            customer.PasswordSalt = saltKey;
-                            customer.Password = _encryptionService.CreatePasswordHash(request.NewPassword, saltKey, _customerSettings.HashedPasswordFormat);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                customer.PasswordFormat = request.NewPasswordFormat;
-                _customerService.UpdateCustomer(customer);
+                PasswordFormat = request.NewPasswordFormat,
+                CreatedOnUtc = DateTime.UtcNow
+            };
+
+            switch (request.NewPasswordFormat)
+            {
+                case PasswordFormat.Clear:
+                        customerPassword.Password = request.NewPassword;
+                    break;
+                case PasswordFormat.Encrypted:
+                        customerPassword.Password = _encryptionService.EncryptText(request.NewPassword);
+                    break;
+                case PasswordFormat.Hashed:
+                    {
+                        var saltKey = _encryptionService.CreateSaltKey(5);
+                        customerPassword.PasswordSalt = saltKey;
+                        customerPassword.Password = _encryptionService.CreatePasswordHash(request.NewPassword, saltKey, _customerSettings.HashedPasswordFormat);
+                    }
+                    break;
             }
+            customer.CustomerPasswords.Add(customerPassword);
+            _customerService.UpdateCustomer(customer);
 
             return result;
         }

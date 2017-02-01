@@ -22,9 +22,6 @@ namespace Nop.Data.Tests.Customers
             var fromDb = SaveAndLoadEntity(customer);
             fromDb.ShouldNotBeNull();
             fromDb.Username.ShouldEqual("a@b.com");
-            fromDb.Password.ShouldEqual("password");
-            fromDb.PasswordFormat.ShouldEqual(PasswordFormat.Clear);
-            fromDb.PasswordSalt.ShouldEqual("");
             fromDb.Email.ShouldEqual("a@b.com");
             fromDb.AdminComment.ShouldEqual("some comment here");
             fromDb.IsTaxExempt.ShouldEqual(true);
@@ -40,6 +37,30 @@ namespace Nop.Data.Tests.Customers
             fromDb.CreatedOnUtc.ShouldEqual(new DateTime(2010, 01, 01));
             fromDb.LastLoginDateUtc.ShouldEqual(new DateTime(2010, 01, 02));
             fromDb.LastActivityDateUtc.ShouldEqual(new DateTime(2010, 01, 03));
+        }
+
+        [Test]
+        public void Can_save_and_load_customer_with_password()
+        {
+            var customer = GetTestCustomer();
+            customer.CustomerPasswords.Add
+            (
+                new CustomerPassword
+                {
+                    Password = "password",
+                    PasswordFormat = PasswordFormat.Clear,
+                    PasswordSalt = string.Empty,
+                    CreatedOnUtc = DateTime.UtcNow
+                }
+            );
+
+
+            var fromDb = SaveAndLoadEntity(customer);
+            fromDb.ShouldNotBeNull();
+
+            fromDb.CustomerPasswords.ShouldNotBeNull();
+            (fromDb.CustomerPasswords.Count == 1).ShouldBeTrue();
+            fromDb.CustomerPasswords.First().Password.ShouldEqual("password");
         }
 
         [Test]
@@ -219,9 +240,6 @@ namespace Nop.Data.Tests.Customers
             return new Customer
             {
                 Username = "a@b.com",
-                Password = "password",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = "",
                 Email = "a@b.com",
                 CustomerGuid = Guid.NewGuid(),
                 AdminComment = "some comment here",
