@@ -7,6 +7,7 @@ using Nop.Core.Data;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Security;
 using Nop.Services.Customers;
+using Nop.Services.Events;
 using Nop.Services.Localization;
 
 namespace Nop.Services.Security
@@ -39,6 +40,7 @@ namespace Nop.Services.Security
         private readonly ILocalizationService _localizationService;
         private readonly ILanguageService _languageService;
         private readonly ICacheManager _cacheManager;
+        private readonly IEventPublisher _eventPublisher;
 
         #endregion
 
@@ -53,12 +55,14 @@ namespace Nop.Services.Security
         /// <param name="localizationService">Localization service</param>
         /// <param name="languageService">Language service</param>
         /// <param name="cacheManager">Cache manager</param>
+        /// <param name="eventPublisher">Event publisher</param>
         public PermissionService(IRepository<PermissionRecord> permissionRecordRepository,
             ICustomerService customerService,
             IWorkContext workContext,
              ILocalizationService localizationService,
             ILanguageService languageService,
-            ICacheManager cacheManager)
+            ICacheManager cacheManager,
+            IEventPublisher eventPublisher)
         {
             this._permissionRecordRepository = permissionRecordRepository;
             this._customerService = customerService;
@@ -66,6 +70,7 @@ namespace Nop.Services.Security
             this._localizationService = localizationService;
             this._languageService = languageService;
             this._cacheManager = cacheManager;
+            this._eventPublisher = eventPublisher;
         }
 
         #endregion
@@ -110,6 +115,9 @@ namespace Nop.Services.Security
             _permissionRecordRepository.Delete(permission);
 
             _cacheManager.RemoveByPattern(PERMISSIONS_PATTERN_KEY);
+
+            //event notification
+            _eventPublisher.EntityDeleted(permission);
         }
 
         /// <summary>
@@ -169,6 +177,9 @@ namespace Nop.Services.Security
             _permissionRecordRepository.Insert(permission);
 
             _cacheManager.RemoveByPattern(PERMISSIONS_PATTERN_KEY);
+
+            //event notification
+            _eventPublisher.EntityInserted(permission);
         }
 
         /// <summary>
@@ -183,6 +194,9 @@ namespace Nop.Services.Security
             _permissionRecordRepository.Update(permission);
 
             _cacheManager.RemoveByPattern(PERMISSIONS_PATTERN_KEY);
+
+            //event notification
+            _eventPublisher.EntityUpdated(permission);
         }
 
         /// <summary>

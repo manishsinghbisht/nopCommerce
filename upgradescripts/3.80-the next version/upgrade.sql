@@ -1433,6 +1433,27 @@ set @resources='
   <LocaleResource Name="Account.ChangePassword.Errors.PasswordMatchesWithPrevious">
     <Value>You entered the password that is the same as one of the last passwords you used. Please create a new password.</Value>
   </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.EnablePasswordLifetime">
+    <Value>Enable password lifetime</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.EnablePasswordLifetime.Hint">
+    <Value>Check to force users to change their passwords after a specified time.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.PasswordLifetime">
+    <Value>Password lifetime</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.PasswordLifetime.Hint">
+    <Value>Specify number of days for password expiration.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.PasswordLifetimeForUsersWithAdminAccessOnly">
+    <Value>Password lifetime for users with admin access only</Value>
+  </LocaleResource>
+  <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.PasswordLifetimeForUsersWithAdminAccessOnly.Hint">
+    <Value>Check to force only users with admin access periodically change their passwords.</Value>
+  </LocaleResource>
+  <LocaleResource Name="Account.ChangePassword.PasswordIsExpired">
+    <Value>Your password has expired, please create a new one</Value>
+  </LocaleResource>   
 </Language>
 '
 
@@ -3889,5 +3910,29 @@ IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'customersettings.undupli
 BEGIN
     INSERT [Setting] ([Name], [Value], [StoreId])
     VALUES (N'customersettings.unduplicatedpasswordsnumber', N'4', 0)
+END
+GO
+
+ --new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'customersettings.enablepasswordlifetime')
+BEGIN
+    INSERT [Setting] ([Name], [Value], [StoreId])
+    VALUES (N'customersettings.enablepasswordlifetime', N'false', 0)
+END
+GO
+
+ --new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'customersettings.passwordlifetime')
+BEGIN
+    INSERT [Setting] ([Name], [Value], [StoreId])
+    VALUES (N'customersettings.passwordlifetime', N'90', 0)
+END
+GO
+
+ --new setting
+IF NOT EXISTS (SELECT 1 FROM [Setting] WHERE [name] = N'customersettings.passwordlifetimeforuserswithadminaccessonly')
+BEGIN
+    INSERT [Setting] ([Name], [Value], [StoreId])
+    VALUES (N'customersettings.passwordlifetimeforuserswithadminaccessonly', N'true', 0)
 END
 GO

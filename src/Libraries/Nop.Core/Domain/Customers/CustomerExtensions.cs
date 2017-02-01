@@ -6,20 +6,6 @@ namespace Nop.Core.Domain.Customers
 {
     public static class CustomerExtensions
     {
-        /// <summary>
-        /// Get current customer password
-        /// </summary>
-        /// <param name="customer">Cusstomer</param>
-        /// <returns>Customer password</returns>
-        public static CustomerPassword GetCustomerPassword(this Customer customer)
-        {
-            if (customer == null)
-                throw new ArgumentNullException("customer");
-
-            //return latest password
-            return customer.CustomerPasswords.OrderByDescending(password => password.CreatedOnUtc).FirstOrDefault();
-        }
-
         #region Customer role
 
         /// <summary>

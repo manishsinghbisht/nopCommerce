@@ -4,10 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 using Nop.Core;
+using Nop.Core.Caching;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Infrastructure;
 using Nop.Services.Common;
+using Nop.Services.Customers.Cache;
 using Nop.Services.Localization;
+using Nop.Services.Security;
 
 namespace Nop.Services.Customers
 {
@@ -406,6 +409,61 @@ namespace Nop.Services.Customers
                .ToArray();
 
             return customerRolesIds;
+        }
+
+        /// <summary>
+        /// Get current customer password
+        /// </summary>
+        /// <param name="customer">Cusstomer</param>
+        /// <returns>Customer password</returns>
+        public static CustomerPassword GetCustomerPassword(this Customer customer)
+        {
+            if (customer == null)
+                throw new ArgumentNullException("customer");
+
+            //return latest password
+            return customer.CustomerPasswords.OrderByDescending(password => password.CreatedOnUtc).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Check whether customer password is expired 
+        /// </summary>
+        /// <param name="customer">Customer</param>
+        /// <returns>True if password is expired; otherwise false</returns>
+        public static bool PasswordIsExpired(this Customer customer)
+        {
+            if (customer == null)
+                throw new ArgumentNullException("customer");
+
+            //cache result between HTTP requests 
+            var cacheManager = EngineContext.Current.ContainerManager.Resolve<ICacheManager>("nop_cache_static");
+            var cacheKey = string.Format(CustomerCacheEventConsumer.CUSTOMER_PASSWORD_EXPIRED, customer.Id);
+
+            return cacheManager.Get(cacheKey, () =>
+            {
+                var customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
+
+                //password lifetime is disabled
+                if (!customerSettings.EnablePasswordLifetime)
+                    return false;
+
+                //check only for user with admin access
+                if (customerSettings.PasswordLifetimeForUsersWithAdminAccessOnly)
+                {
+                    var permissionService = EngineContext.Current.Resolve<IPermissionService>();
+                    if (!permissionService.Authorize(StandardPermissionProvider.AccessAdminPanel, customer))
+                        return false;
+                }
+
+                var customerPassword = customer.GetCustomerPassword();
+                if (customerPassword == null)
+                    return true;
+
+                //get current password usage time
+                var currentLifetime = (DateTime.UtcNow - customerPassword.CreatedOnUtc).Days;
+
+                return currentLifetime >= customerSettings.PasswordLifetime;
+            });
         }
     }
 }
