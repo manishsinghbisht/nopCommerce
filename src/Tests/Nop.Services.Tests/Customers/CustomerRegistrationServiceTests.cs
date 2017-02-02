@@ -51,7 +51,10 @@ namespace Nop.Services.Tests.Customers
         [SetUp]
         public new void SetUp()
         {
-            _customerSettings = new CustomerSettings();
+            _customerSettings = new CustomerSettings
+            {
+                UnduplicatedPasswordsNumber = 1
+            };
             _securitySettings = new SecuritySettings
             {
                 EncryptionKey = "273ece6f97dd844d"
@@ -231,5 +234,22 @@ namespace Nop.Services.Tests.Customers
                 SystemName = SystemCustomerRoleNames.Registered
             });
         }
+
+        [Test]
+        public void Can_change_password()
+        {
+            var request = new ChangePasswordRequest("registered@test.com", true, PasswordFormat.Clear, "password", "password");
+            var result = _customerRegistrationService.ChangePassword(request);
+            result.Success.ShouldEqual(false);
+
+            request = new ChangePasswordRequest("registered@test.com", true, PasswordFormat.Hashed, "newpassword", "password");
+            result = _customerRegistrationService.ChangePassword(request);
+            result.Success.ShouldEqual(true);
+
+            request = new ChangePasswordRequest("registered@test.com", true, PasswordFormat.Encrypted, "password", "newpassword");
+            result = _customerRegistrationService.ChangePassword(request);
+            result.Success.ShouldEqual(true);
+        }
+
     }
 }
