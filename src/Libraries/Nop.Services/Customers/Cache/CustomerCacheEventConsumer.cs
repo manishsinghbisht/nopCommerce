@@ -2,11 +2,9 @@
 using Nop.Core.Caching;
 using Nop.Core.Domain.Configuration;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Domain.Security;
 using Nop.Core.Events;
 using Nop.Core.Infrastructure;
 using Nop.Services.Events;
-using Nop.Services.Security;
 
 namespace Nop.Services.Customers.Cache
 {
@@ -16,8 +14,8 @@ namespace Nop.Services.Customers.Cache
     public partial class CustomerCacheEventConsumer :
         //settings
         IConsumer<EntityUpdated<Setting>>,
-        //permissions
-        IConsumer<EntityUpdated<PermissionRecord>>,
+        //customer role
+        IConsumer<EntityUpdated<CustomerRole>>,
         //passwords
         IConsumer<CustomerPasswordChangedEvent>
     {
@@ -55,17 +53,15 @@ namespace Nop.Services.Customers.Cache
         //settings
         public void HandleEvent(EntityUpdated<Setting> eventMessage)
         {
-            //depends on CustomerSettings.EnablePasswordLifetime, CustomerSettings.PasswordLifetime, CustomerSettings.PasswordLifetimeForUsersWithAdminAccessOnly
-            if (eventMessage.Entity.Name.StartsWith("customer", StringComparison.InvariantCultureIgnoreCase))
+            //depends on CustomerSettings.PasswordLifetime
+            if (eventMessage.Entity.Name.Equals("customersettings.passwordlifetime", StringComparison.InvariantCultureIgnoreCase))
                 _cacheManager.RemoveByPattern(CUSTOMER_PASSWORD_EXPIRED_PATTERN_KEY);
         }
 
-        //permissions
-        public void HandleEvent(EntityUpdated<PermissionRecord> eventMessage)
+        //customer role
+        public void HandleEvent(EntityUpdated<CustomerRole> eventMessage)
         {
-            //depends on AccessAdminPanel permission
-            if (eventMessage.Entity.SystemName == StandardPermissionProvider.AccessAdminPanel.SystemName)
-                _cacheManager.RemoveByPattern(CUSTOMER_PASSWORD_EXPIRED_PATTERN_KEY);
+            _cacheManager.RemoveByPattern(CUSTOMER_PASSWORD_EXPIRED_PATTERN_KEY);
         }
 
         //password changed

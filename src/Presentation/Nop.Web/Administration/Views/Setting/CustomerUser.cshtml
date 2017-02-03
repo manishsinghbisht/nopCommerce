@@ -216,24 +216,6 @@
                 </div>
                 <div class="form-group advanced-setting">
                     <div class="col-md-3">
-                        @Html.NopLabelFor(model => model.CustomerSettings.EnablePasswordLifetime)
-                    </div>
-                    <div class="col-md-9">
-                        @Html.NopEditorFor(model => model.CustomerSettings.EnablePasswordLifetime)
-                        @Html.ValidationMessageFor(model => model.CustomerSettings.EnablePasswordLifetime)
-                    </div>
-                </div>
-                <div class="form-group advanced-setting" id="pnlPasswordLifetimeForUsersWithAdminAccessOnly">
-                    <div class="col-md-3">
-                        @Html.NopLabelFor(model => model.CustomerSettings.PasswordLifetimeForUsersWithAdminAccessOnly)
-                    </div>
-                    <div class="col-md-9">
-                        @Html.NopEditorFor(model => model.CustomerSettings.PasswordLifetimeForUsersWithAdminAccessOnly)
-                        @Html.ValidationMessageFor(model => model.CustomerSettings.PasswordLifetimeForUsersWithAdminAccessOnly)
-                    </div>
-                </div>
-                <div class="form-group advanced-setting" id="pnlPasswordLifetime">
-                    <div class="col-md-3">
                         @Html.NopLabelFor(model => model.CustomerSettings.PasswordLifetime)
                     </div>
                     <div class="col-md-9">
@@ -336,11 +318,9 @@
                 $(document).ready(function() {
                     $("#@Html.FieldIdFor(model => model.CustomerSettings.AllowCustomersToUploadAvatars)").click(toggleAvatar);
                     $("#@Html.FieldIdFor(model => model.CustomerSettings.UsernamesEnabled)").click(toggleUsername);
-                    $("#@Html.FieldIdFor(model => model.CustomerSettings.EnablePasswordLifetime)").click(toggleEnablePasswordLifetime);
 
                     toggleAvatar();
                     toggleUsername();
-                    toggleEnablePasswordLifetime();
                 });
 
                 function toggleAvatar() {
@@ -358,16 +338,6 @@
                     } else {
                         $('#pnlAllowUsersToChangeUsernames').hide();
                         $('#pnlCheckUsernameAvailability').hide();
-                    }
-                }
-
-                function toggleEnablePasswordLifetime() {
-                    if ($('#@Html.FieldIdFor(model => model.CustomerSettings.EnablePasswordLifetime)').is(':checked')) {
-                        $('#pnlPasswordLifetimeForUsersWithAdminAccessOnly').show();
-                        $('#pnlPasswordLifetime').show();
-                    } else {
-                        $('#pnlPasswordLifetimeForUsersWithAdminAccessOnly').hide();
-                        $('#pnlPasswordLifetime').hide();
                     }
                 }
             </script>

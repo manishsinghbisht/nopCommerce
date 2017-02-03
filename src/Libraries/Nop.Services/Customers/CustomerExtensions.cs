@@ -10,7 +10,6 @@ using Nop.Core.Infrastructure;
 using Nop.Services.Common;
 using Nop.Services.Customers.Cache;
 using Nop.Services.Localization;
-using Nop.Services.Security;
 
 namespace Nop.Services.Customers
 {
@@ -443,17 +442,9 @@ namespace Nop.Services.Customers
             {
                 var customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
 
-                //password lifetime is disabled
-                if (!customerSettings.EnablePasswordLifetime)
+                //password lifetime is disabled for user
+                if (!customer.CustomerRoles.Any(role => role.Active && role.EnablePasswordLifetime))
                     return false;
-
-                //check only for user with admin access
-                if (customerSettings.PasswordLifetimeForUsersWithAdminAccessOnly)
-                {
-                    var permissionService = EngineContext.Current.Resolve<IPermissionService>();
-                    if (!permissionService.Authorize(StandardPermissionProvider.AccessAdminPanel, customer))
-                        return false;
-                }
 
                 var customerPassword = customer.GetCustomerPassword();
                 if (customerPassword == null)
