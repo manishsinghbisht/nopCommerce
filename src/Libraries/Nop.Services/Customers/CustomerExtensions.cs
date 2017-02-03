@@ -440,7 +440,9 @@ namespace Nop.Services.Customers
 
             return cacheManager.Get(cacheKey, () =>
             {
-                var customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
+                //the guests don't have a password
+                if (customer.IsGuest())
+                    return false;
 
                 //password lifetime is disabled for user
                 if (!customer.CustomerRoles.Any(role => role.Active && role.EnablePasswordLifetime))
@@ -449,6 +451,8 @@ namespace Nop.Services.Customers
                 var customerPassword = customer.GetCustomerPassword();
                 if (customerPassword == null)
                     return true;
+
+                var customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
 
                 //get current password usage time
                 var currentLifetime = (DateTime.UtcNow - customerPassword.CreatedOnUtc).Days;
