@@ -1440,7 +1440,7 @@ set @resources='
     <Value>Password lifetime</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Configuration.Settings.CustomerUser.PasswordLifetime.Hint">
-    <Value>Specify number of days for password expiration.</Value>
+    <Value>Specify number of days for password expiration. Don''t forget to check "EnablePasswordLifetime" property on customer role edit page for those roles, who will have to change passwords.</Value>
   </LocaleResource>
   <LocaleResource Name="Admin.Customers.CustomerRoles.Fields.EnablePasswordLifetime">
     <Value>Enable password lifetime</Value>

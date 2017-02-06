@@ -421,11 +421,17 @@ namespace Nop.Services.Customers
             if (customer == null)
                 throw new ArgumentNullException("customer");
 
-            if (customerService == null)
-                customerService = EngineContext.Current.Resolve<ICustomerService>();
+            //cache result between HTTP requests 
+            var cacheManager = EngineContext.Current.ContainerManager.Resolve<ICacheManager>("nop_cache_static");
+            var cacheKey = string.Format(CustomerCacheEventConsumer.CUSTOMER_CURRENT_PASSWORD, customer.Id);
+            return cacheManager.Get(cacheKey, () =>
+            {
+                if (customerService == null)
+                    customerService = EngineContext.Current.Resolve<ICustomerService>();
 
-            //return the latest password
-            return customerService.GetLastCustomerPasswords(customer, 1).FirstOrDefault();
+                //return the latest password
+                return customerService.GetLastCustomerPasswords(customer, 1).FirstOrDefault();
+            });
         }
 
         /// <summary>
@@ -438,31 +444,27 @@ namespace Nop.Services.Customers
             if (customer == null)
                 throw new ArgumentNullException("customer");
 
-            //cache result between HTTP requests 
-            var cacheManager = EngineContext.Current.ContainerManager.Resolve<ICacheManager>("nop_cache_static");
-            var cacheKey = string.Format(CustomerCacheEventConsumer.CUSTOMER_PASSWORD_EXPIRED, customer.Id);
+            //the guests don't have a password
+            if (customer.IsGuest())
+                return false;
 
-            return cacheManager.Get(cacheKey, () =>
-            {
-                //the guests don't have a password
-                if (customer.IsGuest())
-                    return false;
+            //password lifetime is disabled for user
+            if (!customer.CustomerRoles.Any(role => role.Active && role.EnablePasswordLifetime))
+                return false;
 
-                //password lifetime is disabled for user
-                if (!customer.CustomerRoles.Any(role => role.Active && role.EnablePasswordLifetime))
-                    return false;
+            //setting disabled for all
+            var customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
+            if (customerSettings.PasswordLifetime == 0)
+                return false;
 
-                var customerPassword = customer.GetCurrentPassword();
-                if (customerPassword == null)
-                    return true;
+            var customerPassword = customer.GetCurrentPassword();
+            if (customerPassword == null)
+                return true;
 
-                var customerSettings = EngineContext.Current.Resolve<CustomerSettings>();
+            //get current password usage time
+            var currentLifetime = (DateTime.UtcNow - customerPassword.CreatedOnUtc).Days;
 
-                //get current password usage time
-                var currentLifetime = (DateTime.UtcNow - customerPassword.CreatedOnUtc).Days;
-
-                return currentLifetime >= customerSettings.PasswordLifetime;
-            });
+            return currentLifetime >= customerSettings.PasswordLifetime;
         }
     }
 }
