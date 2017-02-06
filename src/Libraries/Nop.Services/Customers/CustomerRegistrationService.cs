@@ -139,7 +139,7 @@ namespace Nop.Services.Customers
             if (customer.CannotLoginUntilDateUtc.HasValue && customer.CannotLoginUntilDateUtc.Value > DateTime.UtcNow)
                 return CustomerLoginResults.LockedOut;
 
-            if (!PasswordsMatch(customer.GetCustomerPassword(), password))
+            if (!PasswordsMatch(customer.GetCurrentPassword(_customerService), password))
             {
                 //wrong password
                 customer.FailedLoginAttempts++;
@@ -240,6 +240,7 @@ namespace Nop.Services.Customers
 
             var customerPassword = new CustomerPassword
             {
+                Customer = request.Customer,
                 PasswordFormat = request.PasswordFormat,
                 CreatedOnUtc = DateTime.UtcNow
             };
@@ -259,7 +260,7 @@ namespace Nop.Services.Customers
                     }
                     break;
             }
-            request.Customer.CustomerPasswords.Add(customerPassword);
+            _customerService.InsertCustomerPassword(customerPassword);
 
             request.Customer.Active = request.IsApproved;
             
@@ -323,7 +324,7 @@ namespace Nop.Services.Customers
             if (request.ValidateRequest)
             {
                 //request isn't valid
-                if (!PasswordsMatch(customer.GetCustomerPassword(), request.OldPassword))
+                if (!PasswordsMatch(customer.GetCurrentPassword(_customerService), request.OldPassword))
                 {
                     result.AddError(_localizationService.GetResource("Account.ChangePassword.Errors.OldPasswordDoesntMatch"));
                     return result;
@@ -334,8 +335,7 @@ namespace Nop.Services.Customers
             if (_customerSettings.UnduplicatedPasswordsNumber > 0)
             {
                 //get some of previous passwords
-                var previousPasswords = customer.CustomerPasswords.OrderByDescending(password => password.CreatedOnUtc)
-                    .Take(_customerSettings.UnduplicatedPasswordsNumber);
+                var previousPasswords = _customerService.GetLastCustomerPasswords(customer, _customerSettings.UnduplicatedPasswordsNumber);
 
                 var newPasswordMatchesWithPrevious = previousPasswords.Any(password => PasswordsMatch(password, request.NewPassword));
                 if (newPasswordMatchesWithPrevious)
@@ -348,6 +348,7 @@ namespace Nop.Services.Customers
             //at this point request is valid
             var customerPassword = new CustomerPassword
             {
+                Customer = customer,
                 PasswordFormat = request.NewPasswordFormat,
                 CreatedOnUtc = DateTime.UtcNow
             };
@@ -367,8 +368,7 @@ namespace Nop.Services.Customers
                     }
                     break;
             }
-            customer.CustomerPasswords.Add(customerPassword);
-            _customerService.UpdateCustomer(customer);
+            _customerService.InsertCustomerPassword(customerPassword);
 
             //publish event
             _eventPublisher.Publish(new CustomerPasswordChangedEvent(customerPassword));

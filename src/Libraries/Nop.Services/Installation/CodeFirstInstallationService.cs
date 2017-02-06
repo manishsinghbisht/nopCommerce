@@ -52,6 +52,7 @@ namespace Nop.Services.Installation
         private readonly IRepository<Language> _languageRepository;
         private readonly IRepository<Currency> _currencyRepository;
         private readonly IRepository<Customer> _customerRepository;
+        private readonly IRepository<CustomerPassword> _customerPasswordRepository;
         private readonly IRepository<CustomerRole> _customerRoleRepository;
         private readonly IRepository<SpecificationAttribute> _specificationAttributeRepository;
         private readonly IRepository<CheckoutAttribute> _checkoutAttributeRepository;
@@ -111,6 +112,7 @@ namespace Nop.Services.Installation
             IRepository<Language> languageRepository,
             IRepository<Currency> currencyRepository,
             IRepository<Customer> customerRepository,
+            IRepository<CustomerPassword> customerPasswordRepository,
             IRepository<CustomerRole> customerRoleRepository,
             IRepository<SpecificationAttribute> specificationAttributeRepository,
             IRepository<CheckoutAttribute> checkoutAttributeRepository,
@@ -166,6 +168,7 @@ namespace Nop.Services.Installation
             this._languageRepository = languageRepository;
             this._currencyRepository = currencyRepository;
             this._customerRepository = customerRepository;
+            this._customerPasswordRepository = customerPasswordRepository;
             this._customerRoleRepository = customerRoleRepository;
             this._specificationAttributeRepository = specificationAttributeRepository;
             this._checkoutAttributeRepository = checkoutAttributeRepository;
@@ -4163,14 +4166,6 @@ namespace Nop.Services.Installation
             secondUser.BillingAddress = defaultSecondUserAddress;
             secondUser.ShippingAddress = defaultSecondUserAddress;
 
-            secondUser.CustomerPasswords.Add(new CustomerPassword
-            {
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = string.Empty,
-                CreatedOnUtc = DateTime.UtcNow
-            });
-
             secondUser.CustomerRoles.Add(crRegistered);
 
             _customerRepository.Insert(secondUser);
@@ -4178,6 +4173,15 @@ namespace Nop.Services.Installation
             _genericAttributeService.SaveAttribute(secondUser, SystemCustomerAttributeNames.FirstName, defaultSecondUserAddress.FirstName);
             _genericAttributeService.SaveAttribute(secondUser, SystemCustomerAttributeNames.LastName, defaultSecondUserAddress.LastName);
 
+            //set customer password
+            _customerPasswordRepository.Insert(new CustomerPassword
+            {
+                Customer = secondUser,
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
 
             //third user
             var thirdUserEmail = "arthur_holmes@nopCommerce.com";
@@ -4210,22 +4214,23 @@ namespace Nop.Services.Installation
             thirdUser.BillingAddress = defaultThirdUserAddress;
             thirdUser.ShippingAddress = defaultThirdUserAddress;
 
-            thirdUser.CustomerPasswords.Add(new CustomerPassword
+            thirdUser.CustomerRoles.Add(crRegistered);
+
+            _customerRepository.Insert(thirdUser);
+            //set default customer name
+            _genericAttributeService.SaveAttribute(thirdUser, SystemCustomerAttributeNames.FirstName, defaultThirdUserAddress.FirstName);
+            _genericAttributeService.SaveAttribute(thirdUser, SystemCustomerAttributeNames.LastName, defaultThirdUserAddress.LastName);
+
+            //set customer password
+            _customerPasswordRepository.Insert(new CustomerPassword
             {
+                Customer = thirdUser,
                 Password = "123456",
                 PasswordFormat = PasswordFormat.Clear,
                 PasswordSalt = string.Empty,
                 CreatedOnUtc = DateTime.UtcNow
             });
 
-
-            thirdUser.CustomerRoles.Add(crRegistered);
-            _customerRepository.Insert(thirdUser);
-            //set default customer name
-            _genericAttributeService.SaveAttribute(thirdUser, SystemCustomerAttributeNames.FirstName, defaultThirdUserAddress.FirstName);
-            _genericAttributeService.SaveAttribute(thirdUser, SystemCustomerAttributeNames.LastName, defaultThirdUserAddress.LastName);
-
-            
             //fourth user
             var fourthUserEmail = "james_pan@nopCommerce.com";
             var fourthUser = new Customer
@@ -4257,14 +4262,6 @@ namespace Nop.Services.Installation
             fourthUser.BillingAddress = defaultFourthUserAddress;
             fourthUser.ShippingAddress = defaultFourthUserAddress;
 
-            fourthUser.CustomerPasswords.Add(new CustomerPassword
-            {
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = string.Empty,
-                CreatedOnUtc = DateTime.UtcNow
-            });
-
             fourthUser.CustomerRoles.Add(crRegistered);
 
             _customerRepository.Insert(fourthUser);
@@ -4272,6 +4269,15 @@ namespace Nop.Services.Installation
             _genericAttributeService.SaveAttribute(fourthUser, SystemCustomerAttributeNames.FirstName, defaultFourthUserAddress.FirstName);
             _genericAttributeService.SaveAttribute(fourthUser, SystemCustomerAttributeNames.LastName, defaultFourthUserAddress.LastName);
 
+            //set customer password
+            _customerPasswordRepository.Insert(new CustomerPassword
+            {
+                Customer = fourthUser,
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
 
             //fifth user
             var fifthUserEmail = "brenda_lindgren@nopCommerce.com";
@@ -4305,14 +4311,6 @@ namespace Nop.Services.Installation
             fifthUser.BillingAddress = defaultFifthUserAddress;
             fifthUser.ShippingAddress = defaultFifthUserAddress;
 
-            fifthUser.CustomerPasswords.Add(new CustomerPassword
-            {
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = string.Empty,
-                CreatedOnUtc = DateTime.UtcNow
-            });
-
             fifthUser.CustomerRoles.Add(crRegistered);
 
             _customerRepository.Insert(fifthUser);
@@ -4320,6 +4318,15 @@ namespace Nop.Services.Installation
             _genericAttributeService.SaveAttribute(fifthUser, SystemCustomerAttributeNames.FirstName, defaultFifthUserAddress.FirstName);
             _genericAttributeService.SaveAttribute(fifthUser, SystemCustomerAttributeNames.LastName, defaultFifthUserAddress.LastName);
 
+            //set customer password
+            _customerPasswordRepository.Insert(new CustomerPassword
+            {
+                Customer = fifthUser,
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
 
             //sixth user
             var sixthUserEmail = "victoria_victoria@nopCommerce.com";
@@ -4353,14 +4360,6 @@ namespace Nop.Services.Installation
             sixthUser.BillingAddress = defaultSixthUserAddress;
             sixthUser.ShippingAddress = defaultSixthUserAddress;
 
-            sixthUser.CustomerPasswords.Add(new CustomerPassword
-            {
-                Password = "123456",
-                PasswordFormat = PasswordFormat.Clear,
-                PasswordSalt = string.Empty,
-                CreatedOnUtc = DateTime.UtcNow
-            });
-
             sixthUser.CustomerRoles.Add(crRegistered);
 
             _customerRepository.Insert(sixthUser);
@@ -4368,6 +4367,15 @@ namespace Nop.Services.Installation
             _genericAttributeService.SaveAttribute(sixthUser, SystemCustomerAttributeNames.FirstName, defaultSixthUserAddress.FirstName);
             _genericAttributeService.SaveAttribute(sixthUser, SystemCustomerAttributeNames.LastName, defaultSixthUserAddress.LastName);
 
+            //set customer password
+            _customerPasswordRepository.Insert(new CustomerPassword
+            {
+                Customer = sixthUser,
+                Password = "123456",
+                PasswordFormat = PasswordFormat.Clear,
+                PasswordSalt = string.Empty,
+                CreatedOnUtc = DateTime.UtcNow
+            });
 
             //search engine (crawler) built-in user
             var searchEngineUser = new Customer

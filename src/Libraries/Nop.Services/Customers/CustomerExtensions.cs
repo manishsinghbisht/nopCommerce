@@ -413,15 +413,19 @@ namespace Nop.Services.Customers
         /// <summary>
         /// Get current customer password
         /// </summary>
-        /// <param name="customer">Cusstomer</param>
+        /// <param name="customer">Customer</param>
+        /// <param name="customerService">Customer service</param>
         /// <returns>Customer password</returns>
-        public static CustomerPassword GetCustomerPassword(this Customer customer)
+        public static CustomerPassword GetCurrentPassword(this Customer customer, ICustomerService customerService = null)
         {
             if (customer == null)
                 throw new ArgumentNullException("customer");
 
-            //return latest password
-            return customer.CustomerPasswords.OrderByDescending(password => password.CreatedOnUtc).FirstOrDefault();
+            if (customerService == null)
+                customerService = EngineContext.Current.Resolve<ICustomerService>();
+
+            //return the latest password
+            return customerService.GetLastCustomerPasswords(customer, 1).FirstOrDefault();
         }
 
         /// <summary>
@@ -448,7 +452,7 @@ namespace Nop.Services.Customers
                 if (!customer.CustomerRoles.Any(role => role.Active && role.EnablePasswordLifetime))
                     return false;
 
-                var customerPassword = customer.GetCustomerPassword();
+                var customerPassword = customer.GetCurrentPassword();
                 if (customerPassword == null)
                     return true;
 

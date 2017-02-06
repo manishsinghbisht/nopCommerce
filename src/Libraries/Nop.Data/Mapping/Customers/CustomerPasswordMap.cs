@@ -10,7 +10,7 @@ namespace Nop.Data.Mapping.Customers
             this.HasKey(password => password.Id);
 
             this.HasRequired(password => password.Customer)
-                .WithMany(customer => customer.CustomerPasswords)
+                .WithMany()
                 .HasForeignKey(password => password.CustomerId);
 
             this.Ignore(password => password.PasswordFormat);

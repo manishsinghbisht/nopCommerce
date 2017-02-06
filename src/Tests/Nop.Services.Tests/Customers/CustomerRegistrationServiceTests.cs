@@ -72,16 +72,6 @@ namespace Nop.Services.Tests.Customers
                 Email = "a@b.com",
                 Active = true
             };
-
-            string saltKey = _encryptionService.CreateSaltKey(5);
-            string password = _encryptionService.CreatePasswordHash("password", saltKey);
-            customer1.CustomerPasswords.Add(new CustomerPassword
-            {
-                PasswordFormat = PasswordFormat.Hashed,
-                PasswordSalt = saltKey,
-                Password = password,
-                CreatedOnUtc = DateTime.UtcNow
-            });
             AddCustomerToRegisteredRole(customer1);
 
             var customer2 = new Customer
@@ -90,12 +80,6 @@ namespace Nop.Services.Tests.Customers
                 Email = "test@test.com",
                 Active = true
             };
-            customer2.CustomerPasswords.Add(new CustomerPassword
-            {
-                PasswordFormat = PasswordFormat.Clear,
-                Password = "password",
-                CreatedOnUtc = DateTime.UtcNow
-            });
             AddCustomerToRegisteredRole(customer2);
 
             var customer3 = new Customer
@@ -104,12 +88,6 @@ namespace Nop.Services.Tests.Customers
                 Email = "user@test.com",
                 Active = true
             };
-            customer3.CustomerPasswords.Add(new CustomerPassword
-            {
-                PasswordFormat = PasswordFormat.Encrypted,
-                Password = _encryptionService.EncryptText("password"),
-                CreatedOnUtc = DateTime.UtcNow
-            });
             AddCustomerToRegisteredRole(customer3);
 
             var customer4 = new Customer
@@ -118,12 +96,6 @@ namespace Nop.Services.Tests.Customers
                 Email = "registered@test.com",
                 Active = true
             };
-            customer4.CustomerPasswords.Add(new CustomerPassword
-            {
-                PasswordFormat = PasswordFormat.Clear,
-                Password = "password",
-                CreatedOnUtc = DateTime.UtcNow
-            });
             AddCustomerToRegisteredRole(customer4);
 
             var customer5 = new Customer
@@ -132,21 +104,53 @@ namespace Nop.Services.Tests.Customers
                 Email = "notregistered@test.com",
                 Active = true
             };
-            customer5.CustomerPasswords.Add(new CustomerPassword
+            _customerRepo.Expect(x => x.Table).Return(new List<Customer> { customer1, customer2, customer3, customer4, customer5 }.AsQueryable());
+
+            _customerPasswordRepo = MockRepository.GenerateMock<IRepository<CustomerPassword>>();
+            string saltKey = _encryptionService.CreateSaltKey(5);
+            string password = _encryptionService.CreatePasswordHash("password", saltKey);
+            var password1 = new CustomerPassword
             {
+                Customer = customer1,
+                PasswordFormat = PasswordFormat.Hashed,
+                PasswordSalt = saltKey,
+                Password = password,
+                CreatedOnUtc = DateTime.UtcNow
+            };
+            var password2 = new CustomerPassword
+            {
+                Customer = customer2,
                 PasswordFormat = PasswordFormat.Clear,
                 Password = "password",
                 CreatedOnUtc = DateTime.UtcNow
-            });
+            };
+            var password3 = new CustomerPassword
+            {
+                Customer = customer3,
+                PasswordFormat = PasswordFormat.Encrypted,
+                Password = _encryptionService.EncryptText("password"),
+                CreatedOnUtc = DateTime.UtcNow
+            };
+            var password4 = new CustomerPassword
+            {
+                Customer = customer4,
+                PasswordFormat = PasswordFormat.Clear,
+                Password = "password",
+                CreatedOnUtc = DateTime.UtcNow
+            };
+            var password5 = new CustomerPassword
+            {
+                Customer= customer5,
+                PasswordFormat = PasswordFormat.Clear,
+                Password = "password",
+                CreatedOnUtc = DateTime.UtcNow
+            };
+            _customerPasswordRepo.Expect(x => x.Table).Return(new[] { password1, password2, password3, password4, password5 }.AsQueryable());
 
             _eventPublisher = MockRepository.GenerateMock<IEventPublisher>();
             _eventPublisher.Expect(x => x.Publish(Arg<object>.Is.Anything));
 
             _storeService = MockRepository.GenerateMock<IStoreService>();
-
-            _customerRepo.Expect(x => x.Table).Return(new List<Customer> { customer1, customer2, customer3, customer4, customer5 }.AsQueryable());
-
-            _customerPasswordRepo = MockRepository.GenerateMock<IRepository<CustomerPassword>>();
             _customerRoleRepo = MockRepository.GenerateMock<IRepository<CustomerRole>>();
             _genericAttributeRepo = MockRepository.GenerateMock<IRepository<GenericAttribute>>();
             _orderRepo = MockRepository.GenerateMock<IRepository<Order>>();

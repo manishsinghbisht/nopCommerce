@@ -40,30 +40,6 @@ namespace Nop.Data.Tests.Customers
         }
 
         [Test]
-        public void Can_save_and_load_customer_with_password()
-        {
-            var customer = GetTestCustomer();
-            customer.CustomerPasswords.Add
-            (
-                new CustomerPassword
-                {
-                    Password = "password",
-                    PasswordFormat = PasswordFormat.Clear,
-                    PasswordSalt = string.Empty,
-                    CreatedOnUtc = DateTime.UtcNow
-                }
-            );
-
-
-            var fromDb = SaveAndLoadEntity(customer);
-            fromDb.ShouldNotBeNull();
-
-            fromDb.CustomerPasswords.ShouldNotBeNull();
-            (fromDb.CustomerPasswords.Count == 1).ShouldBeTrue();
-            fromDb.CustomerPasswords.First().Password.ShouldEqual("password");
-        }
-
-        [Test]
         public void Can_save_and_load_customer_with_customerRoles()
         {
             var customer = GetTestCustomer();

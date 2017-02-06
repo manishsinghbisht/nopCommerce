@@ -10,7 +10,6 @@ namespace Nop.Core.Domain.Customers
     /// </summary>
     public partial class Customer : BaseEntity
     {
-        private ICollection<CustomerPassword> _customerPasswords;
         private ICollection<ExternalAuthenticationRecord> _externalAuthenticationRecords;
         private ICollection<CustomerRole> _customerRoles;
         private ICollection<ShoppingCartItem> _shoppingCartItems;
@@ -133,15 +132,6 @@ namespace Nop.Core.Domain.Customers
         public int RegisteredInStoreId { get; set; }
 
         #region Navigation properties
-
-        /// <summary>
-        /// Gets or sets customer passwords
-        /// </summary>
-        public virtual ICollection<CustomerPassword> CustomerPasswords
-        {
-            get { return _customerPasswords ?? (_customerPasswords = new List<CustomerPassword>()); }
-            protected set { _customerPasswords = value; }
-        }
 
         /// <summary>
         /// Gets or sets customer generated content

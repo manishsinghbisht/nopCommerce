@@ -1272,9 +1272,9 @@ namespace Nop.Services.ExportImport
                 new PropertyByName<Customer>("CustomerGuid", p => p.CustomerGuid),
                 new PropertyByName<Customer>("Email", p => p.Email),
                 new PropertyByName<Customer>("Username", p => p.Username),
-                new PropertyByName<Customer>("Password", p => p.GetCustomerPassword().Return(password => password.Password, null)),
-                new PropertyByName<Customer>("PasswordFormatId", p => p.GetCustomerPassword().Return(password => password.PasswordFormatId, 0)),
-                new PropertyByName<Customer>("PasswordSalt", p => p.GetCustomerPassword().Return(password => password.PasswordSalt, null)),
+                new PropertyByName<Customer>("Password", p => p.GetCurrentPassword().Return(password => password.Password, null)),
+                new PropertyByName<Customer>("PasswordFormatId", p => p.GetCurrentPassword().Return(password => password.PasswordFormatId, 0)),
+                new PropertyByName<Customer>("PasswordSalt", p => p.GetCurrentPassword().Return(password => password.PasswordSalt, null)),
                 new PropertyByName<Customer>("IsTaxExempt", p => p.IsTaxExempt),
                 new PropertyByName<Customer>("AffiliateId", p => p.AffiliateId),
                 new PropertyByName<Customer>("VendorId", p => p.VendorId),
@@ -1330,7 +1330,7 @@ namespace Nop.Services.ExportImport
                 xmlWriter.WriteElementString("Email", null, customer.Email);
                 xmlWriter.WriteElementString("Username", null, customer.Username);
 
-                var customerPassword = customer.GetCustomerPassword();
+                var customerPassword = customer.GetCurrentPassword();
                 xmlWriter.WriteElementString("Password", null, customerPassword.Return(password => password.Password, null));
                 xmlWriter.WriteElementString("PasswordFormatId", null, customerPassword.Return(password => password.PasswordFormatId, 0).ToString());
                 xmlWriter.WriteElementString("PasswordSalt", null, customerPassword.Return(password => password.PasswordSalt, null));

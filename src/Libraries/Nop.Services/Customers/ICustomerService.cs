@@ -201,6 +201,20 @@ namespace Nop.Services.Customers
         /// <returns>List of customer passwords</returns>
         IList<CustomerPassword> GetAllCustomerPasswords(Customer customer = null, PasswordFormat? passwordFormat = null);
 
+        /// <summary>
+        /// Gets last customer passwords
+        /// </summary>
+        /// <param name="customer">Customer</param>
+        /// <param name="passwordsToReturn">Number of returning passwords</param>
+        /// <returns>List of customer passwords</returns>
+        IList<CustomerPassword> GetLastCustomerPasswords(Customer customer, int passwordsToReturn);
+
+        /// <summary>
+        /// Inserts a customer password
+        /// </summary>
+        /// <param name="customerPassword">Customer password</param>
+        void InsertCustomerPassword(CustomerPassword customerPassword);
+
         #endregion
     }
 }

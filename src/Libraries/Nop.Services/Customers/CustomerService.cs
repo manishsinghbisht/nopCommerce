@@ -851,6 +851,44 @@ namespace Nop.Services.Customers
             return query.ToList();
         }
 
+        /// <summary>
+        /// Gets last customer passwords
+        /// </summary>
+        /// <param name="customer">Customer</param>
+        /// <param name="passwordsToReturn">Number of returning passwords</param>
+        /// <returns>List of customer passwords</returns>
+        public virtual IList<CustomerPassword> GetLastCustomerPasswords(Customer customer, int passwordsToReturn)
+        {
+            if (customer == null)
+                throw new ArgumentNullException("customer");
+
+            if (passwordsToReturn == 0)
+                return new List<CustomerPassword>();
+
+            //get all passwords of customer
+            var query = _customerPasswordRepository.Table.Where(password => password.CustomerId == customer.Id);
+
+            //get the latest passwords
+            query = query.OrderByDescending(password => password.CreatedOnUtc).Take(passwordsToReturn);
+
+            return query.ToList();
+        }
+
+        /// <summary>
+        /// Inserts a customer password
+        /// </summary>
+        /// <param name="customerPassword">Customer password</param>
+        public virtual void InsertCustomerPassword(CustomerPassword customerPassword)
+        {
+            if (customerPassword == null)
+                throw new ArgumentNullException("customerPassword");
+
+            _customerPasswordRepository.Insert(customerPassword);
+
+            //event notification
+            _eventPublisher.EntityInserted(customerPassword);
+        }
+
         #endregion
 
         #endregion
