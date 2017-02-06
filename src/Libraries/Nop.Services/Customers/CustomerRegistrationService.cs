@@ -139,7 +139,7 @@ namespace Nop.Services.Customers
             if (customer.CannotLoginUntilDateUtc.HasValue && customer.CannotLoginUntilDateUtc.Value > DateTime.UtcNow)
                 return CustomerLoginResults.LockedOut;
 
-            if (!PasswordsMatch(customer.GetCurrentPassword(_customerService), password))
+            if (!PasswordsMatch(_customerService.GetCurrentPassword(customer.Id), password))
             {
                 //wrong password
                 customer.FailedLoginAttempts++;
@@ -324,7 +324,7 @@ namespace Nop.Services.Customers
             if (request.ValidateRequest)
             {
                 //request isn't valid
-                if (!PasswordsMatch(customer.GetCurrentPassword(_customerService), request.OldPassword))
+                if (!PasswordsMatch(_customerService.GetCurrentPassword(customer.Id), request.OldPassword))
                 {
                     result.AddError(_localizationService.GetResource("Account.ChangePassword.Errors.OldPasswordDoesntMatch"));
                     return result;
@@ -335,7 +335,7 @@ namespace Nop.Services.Customers
             if (_customerSettings.UnduplicatedPasswordsNumber > 0)
             {
                 //get some of previous passwords
-                var previousPasswords = _customerService.GetLastCustomerPasswords(customer, _customerSettings.UnduplicatedPasswordsNumber);
+                var previousPasswords = _customerService.GetCustomerPasswords(customer.Id, passwordsToReturn: _customerSettings.UnduplicatedPasswordsNumber);
 
                 var newPasswordMatchesWithPrevious = previousPasswords.Any(password => PasswordsMatch(password, request.NewPassword));
                 if (newPasswordMatchesWithPrevious)

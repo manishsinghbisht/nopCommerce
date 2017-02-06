@@ -831,47 +831,44 @@ namespace Nop.Services.Customers
         #region Customer passwords
 
         /// <summary>
-        /// Gets all customer passwords
+        /// Gets customer passwords
         /// </summary>
-        /// <param name="customer">Customer; pass null to load all records</param>
+        /// <param name="customerId">Customer identifier; pass null to load all records</param>
         /// <param name="passwordFormat">Password format; pass null to load all records</param>
+        /// <param name="passwordsToReturn">Number of returning passwords; pass null to load all records</param>
         /// <returns>List of customer passwords</returns>
-        public virtual IList<CustomerPassword> GetAllCustomerPasswords(Customer customer = null, PasswordFormat? passwordFormat = null)
+        public virtual IList<CustomerPassword> GetCustomerPasswords(int? customerId = null, 
+            PasswordFormat? passwordFormat = null, int? passwordsToReturn = null)
         {
             var query = _customerPasswordRepository.Table;
 
             //filter by customer
-            if (customer != null)
-                query = query.Where(password => password.CustomerId == customer.Id);
+            if (customerId.HasValue)
+                query = query.Where(password => password.CustomerId == customerId.Value);
 
             //filter by password format
             if (passwordFormat.HasValue)
                 query = query.Where(password => password.PasswordFormatId == (int)(passwordFormat.Value));
 
+            //get the latest passwords
+            if (passwordsToReturn.HasValue)
+                query = query.OrderByDescending(password => password.CreatedOnUtc).Take(passwordsToReturn.Value);
+
             return query.ToList();
         }
 
         /// <summary>
-        /// Gets last customer passwords
+        /// Get current customer password
         /// </summary>
-        /// <param name="customer">Customer</param>
-        /// <param name="passwordsToReturn">Number of returning passwords</param>
-        /// <returns>List of customer passwords</returns>
-        public virtual IList<CustomerPassword> GetLastCustomerPasswords(Customer customer, int passwordsToReturn)
+        /// <param name="customerId">Customer identifier</param>
+        /// <returns>Customer password</returns>
+        public virtual CustomerPassword GetCurrentPassword(int customerId)
         {
-            if (customer == null)
-                throw new ArgumentNullException("customer");
+            if (customerId == 0)
+                return null;
 
-            if (passwordsToReturn == 0)
-                return new List<CustomerPassword>();
-
-            //get all passwords of customer
-            var query = _customerPasswordRepository.Table.Where(password => password.CustomerId == customer.Id);
-
-            //get the latest passwords
-            query = query.OrderByDescending(password => password.CreatedOnUtc).Take(passwordsToReturn);
-
-            return query.ToList();
+            //return the latest password
+            return GetCustomerPasswords(customerId, passwordsToReturn: 1).FirstOrDefault();
         }
 
         /// <summary>

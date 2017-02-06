@@ -194,20 +194,21 @@ namespace Nop.Services.Customers
         #region Customer passwords
 
         /// <summary>
-        /// Gets all customer passwords
+        /// Gets customer passwords
         /// </summary>
-        /// <param name="customer">Customer; pass null to load all records</param>
+        /// <param name="customerId">Customer identifier; pass null to load all records</param>
         /// <param name="passwordFormat">Password format; pass null to load all records</param>
+        /// <param name="passwordsToReturn">Number of returning passwords; pass null to load all records</param>
         /// <returns>List of customer passwords</returns>
-        IList<CustomerPassword> GetAllCustomerPasswords(Customer customer = null, PasswordFormat? passwordFormat = null);
+        IList<CustomerPassword> GetCustomerPasswords(int? customerId = null,
+            PasswordFormat? passwordFormat = null, int? passwordsToReturn = null);
 
         /// <summary>
-        /// Gets last customer passwords
+        /// Get current customer password
         /// </summary>
-        /// <param name="customer">Customer</param>
-        /// <param name="passwordsToReturn">Number of returning passwords</param>
-        /// <returns>List of customer passwords</returns>
-        IList<CustomerPassword> GetLastCustomerPasswords(Customer customer, int passwordsToReturn);
+        /// <param name="customerId">Customer identifier</param>
+        /// <returns>Customer password</returns>
+        CustomerPassword GetCurrentPassword(int customerId);
 
         /// <summary>
         /// Inserts a customer password

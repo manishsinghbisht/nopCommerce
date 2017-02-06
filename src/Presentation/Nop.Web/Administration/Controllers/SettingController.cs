@@ -2070,7 +2070,7 @@ namespace Nop.Admin.Controllers
 
                 //update user information
                 //optimization - load only users with PasswordFormat.Encrypted
-                var customerPasswords = _customerService.GetAllCustomerPasswords(passwordFormat: PasswordFormat.Encrypted);
+                var customerPasswords = _customerService.GetCustomerPasswords(passwordFormat: PasswordFormat.Encrypted);
                 foreach (var customerPassword in customerPasswords)
                 {
                     var decryptedPassword = _encryptionService.DecryptText(customerPassword.Password, oldEncryptionPrivateKey);

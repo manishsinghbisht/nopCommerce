@@ -13,13 +13,12 @@ namespace Nop.Services.Customers.Cache
         #region Constants
 
         /// <summary>
-        /// Key for current customer password
+        /// Key for current customer password lifetime
         /// </summary>
         /// <remarks>
         /// {0} : customer identifier
         /// </remarks>
-        public const string CUSTOMER_CURRENT_PASSWORD = "Nop.customers.currentpassword-{0}";
-        public const string CUSTOMER_CURRENT_PASSWORD_PATTERN_KEY = "Nop.customers.currentpassword";
+        public const string CUSTOMER_PASSWORD_LIFETIME = "Nop.customers.passwordlifetime-{0}";
 
         #endregion
 
@@ -44,7 +43,7 @@ namespace Nop.Services.Customers.Cache
         //password changed
         public void HandleEvent(CustomerPasswordChangedEvent eventMessage)
         {
-            _cacheManager.Remove(string.Format(CUSTOMER_CURRENT_PASSWORD, eventMessage.Password.CustomerId));
+            _cacheManager.Remove(string.Format(CUSTOMER_PASSWORD_LIFETIME, eventMessage.Password.CustomerId));
         }
 
         #endregion
